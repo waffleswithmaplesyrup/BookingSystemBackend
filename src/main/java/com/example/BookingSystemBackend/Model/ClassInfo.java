@@ -3,7 +3,6 @@ package com.example.BookingSystemBackend.Model;
 import com.example.BookingSystemBackend.Enum.ClassType;
 import com.example.BookingSystemBackend.Enum.Country;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,8 +11,7 @@ import java.sql.Timestamp;
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
-public class Class {
+public class ClassInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,4 +25,20 @@ public class Class {
     private ClassType classType;
     @Enumerated(EnumType.STRING)
     private Country country;
+
+    public ClassInfo(Timestamp startTimestamp,
+                     int duration,
+                     int creditsRequired,
+                     int classSize,
+                     int availableSlots,
+                     ClassType classType,
+                     Country country) {
+        this.startTimestamp = startTimestamp;
+        this.duration = duration;
+        this.creditsRequired = creditsRequired;
+        this.classSize = classSize;
+        this.availableSlots = availableSlots;
+        this.classType = classType;
+        this.country = country;
+    }
 }

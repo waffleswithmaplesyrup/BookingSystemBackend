@@ -1,7 +1,6 @@
 package com.example.BookingSystemBackend.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,7 +8,6 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Waitlist {
 
@@ -18,7 +16,15 @@ public class Waitlist {
     private Long waitlistId;
     private Timestamp waitlistTimestamp;
     @ManyToOne
-    private Class classWaitlisted;
+    private ClassInfo classWaitlisted;
     @ManyToOne
     private User user;
+
+    public Waitlist(Timestamp waitlistTimestamp,
+                    ClassInfo classWaitlisted,
+                    User user) {
+        this.waitlistTimestamp = waitlistTimestamp;
+        this.classWaitlisted = classWaitlisted;
+        this.user = user;
+    }
 }

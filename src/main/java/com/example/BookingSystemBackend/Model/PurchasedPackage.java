@@ -1,17 +1,14 @@
 package com.example.BookingSystemBackend.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class PurchasedPackage {
 
     @Id
@@ -20,9 +17,23 @@ public class PurchasedPackage {
     private int creditsRemaining;
     private Timestamp purchaseDate;
     private Timestamp expiryDate;
-    private boolean ixExpired;
+    private boolean isExpired;
     @ManyToOne
-    private Package packagePurchased;
+    private PackageBundle packageBundle;
     @ManyToOne
     private User user;
+
+    public PurchasedPackage(int creditsRemaining,
+                            Timestamp purchaseDate,
+                            Timestamp expiryDate,
+                            boolean isExpired,
+                            PackageBundle packageBundle,
+                            User user) {
+        this.creditsRemaining = creditsRemaining;
+        this.purchaseDate = purchaseDate;
+        this.expiryDate = expiryDate;
+        this.isExpired = isExpired;
+        this.packageBundle = packageBundle;
+        this.user = user;
+    }
 }

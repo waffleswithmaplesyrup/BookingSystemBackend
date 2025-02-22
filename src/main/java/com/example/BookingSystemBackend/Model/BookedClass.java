@@ -1,7 +1,6 @@
 package com.example.BookingSystemBackend.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +9,6 @@ import java.sql.Timestamp;
 @Entity
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class BookedClass {
 
     @Id
@@ -22,7 +20,23 @@ public class BookedClass {
     private boolean isRefunded;
     private boolean checkedIn;
     @ManyToOne
-    private Class classBooked;
+    private ClassInfo classBooked;
     @ManyToOne
     private User user;
+
+    public BookedClass(Timestamp bookingTimestamp,
+                       Timestamp cancelledTimestamp,
+                       boolean isCancelled,
+                       boolean isRefunded,
+                       boolean checkedIn,
+                       ClassInfo classBooked,
+                       User user) {
+        this.bookingTimestamp = bookingTimestamp;
+        this.cancelledTimestamp = cancelledTimestamp;
+        this.isCancelled = isCancelled;
+        this.isRefunded = isRefunded;
+        this.checkedIn = checkedIn;
+        this.classBooked = classBooked;
+        this.user = user;
+    }
 }
