@@ -105,4 +105,24 @@ public class BookingController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
+
+    @PatchMapping("/check-in={bookedClassId}")
+    public ResponseEntity<?> checkInToClass(@PathVariable Long bookedClassId) {
+        try {
+            BookedClass checkInClass = classService.checkInToClass(bookedClassId);
+
+            Map<String, Object> successResponse = new HashMap<>();
+            successResponse.put("status", "success");
+            successResponse.put("message", "checked in successfully");
+            successResponse.put("data", checkInClass);
+
+            return ResponseEntity.ok().body(successResponse);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
 }

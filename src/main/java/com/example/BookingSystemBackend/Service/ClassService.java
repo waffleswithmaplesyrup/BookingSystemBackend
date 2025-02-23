@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.awt.print.Book;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -73,7 +74,7 @@ public class ClassService {
         // update the credits remaining in purchased package
         updateCreditsRemaining(packageAvailable, classInDB.get().getCreditsRequired());
 
-        Timestamp bookingTimestamp = Timestamp.valueOf(LocalDateTime.now());
+        LocalDateTime bookingTimestamp = LocalDateTime.now();
 
         BookedClass bookedClass = new BookedClass(
                 bookingTimestamp,
@@ -97,12 +98,15 @@ public class ClassService {
         ClassInfo classCancelled = cancelledBooking.getClassBooked();
 
         // check if class is in the past
-        Date classTiming = new Date(classCancelled.getStartTimestamp().getTime());
-        Date cancellationTime = new Date();
+//        Date classTiming = new Date(classCancelled.getStartTimestamp().getTime());
+//        Date cancellationTime = new Date();
 
-        if(cancellationTime.after(classTiming)) throw new InvalidTimeException();
+        LocalDateTime classTiming = classCancelled.getStartTime();
+        LocalDateTime cancellationTime = LocalDateTime.now();
 
-        cancelledBooking.setCancelledTimestamp(cancellationTime);
+        if(cancellationTime.isAfter(classTiming)) throw new InvalidTimeException();
+
+        cancelledBooking.setCancelledTime(cancellationTime);
         cancelledBooking.setCancelled(true);
 
         if (getsRefund(cancelledBooking)) {
@@ -116,7 +120,7 @@ public class ClassService {
         Optional<Waitlist> firstOnWaitlist = waitlistRepository.getFirstOnWaitlist(classCancelled.getClassId());
 
         if(firstOnWaitlist.isPresent()) {
-            Timestamp bookingTimestamp = Timestamp.valueOf(LocalDateTime.now());
+            LocalDateTime bookingTimestamp = LocalDateTime.now();
 
             BookedClass bookedClass = new BookedClass(
                     bookingTimestamp,
@@ -170,7 +174,7 @@ public class ClassService {
         // update the credits remaining in purchased package
         updateCreditsRemaining(packageAvailable, classInDB.get().getCreditsRequired());
 
-        Timestamp waitlistTimestamp = Timestamp.valueOf(LocalDateTime.now());
+        LocalDateTime waitlistTimestamp = LocalDateTime.now();
 
         Waitlist waitlist = new Waitlist(
                 waitlistTimestamp,
@@ -193,12 +197,8 @@ public class ClassService {
     }
 
     private boolean getsRefund(BookedClass bookedClass) {
-        // check if the cancellation time is 4 hours or more before class start
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(bookedClass.getCancelledTimestamp());
-        calendar.add(Calendar.HOUR, 4);
-        Date afterFourHours = calendar.getTime();
-        return afterFourHours.before(bookedClass.getClassBooked().getStartTimestamp());
+        long hoursBeforeClassStarts = Duration.between(bookedClass.getCancelledTime(), bookedClass.getClassBooked().getStartTime()).toHours();
+        return hoursBeforeClassStarts >= 4;
     }
 
 
@@ -214,5 +214,27 @@ public class ClassService {
         purchasedPackage.setCreditsRemaining(purchasedPackage.getCreditsRemaining()-creditsRequired);
 
         purchasedPackageRepository.save(purchasedPackage);
+    }
+
+    public BookedClass checkInToClass(Long bookedClassId) {
+        // check if booking exists
+        Optional<BookedClass> bookedClassInDB = bookedClassRepository.findById(bookedClassId);
+        if(bookedClassInDB.isEmpty()) throw new NoSuchElementException("class or user not found");
+
+        BookedClass checkInClass = bookedClassInDB.get();
+        ClassInfo classInfo = checkInClass.getClassBooked();
+
+        LocalDateTime startTime = classInfo.getStartTime();
+        LocalDateTime checkInTime = LocalDateTime.now();
+
+        // cannot check in after class starts
+        if(checkInTime.isAfter(startTime)) throw new InvalidTimeException();
+
+        // cannot check in more than 30 minutes before class starts
+        if(Duration.between(checkInTime, startTime).toMinutes() > 30) throw new InvalidTimeException();
+
+        checkInClass.setCheckedIn(true);
+
+        return bookedClassRepository.save(checkInClass);
     }
 }

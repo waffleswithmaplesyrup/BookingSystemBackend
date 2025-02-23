@@ -48,9 +48,9 @@ public class PackageService {
         // check if package country matches with user's country
         if (packageinDB.get().getCountry() != userInDB.get().getCountry()) throw new LocationMismatchException(packageinDB.get().getCountry());
 
-        Timestamp purchaseDate = Timestamp.valueOf(LocalDateTime.now());
+        LocalDateTime purchaseDate = LocalDateTime.now();
 
-        Date expiryDate = calculateExpiryDate(packageinDB.get().getDurationValue(), packageinDB.get().getDurationType());
+        LocalDateTime expiryDate = calculateExpiryDate(packageinDB.get().getDurationValue(), packageinDB.get().getDurationType());
 
         PurchasedPackage purchasedPackage = new PurchasedPackage(
                 packageinDB.get().getCredits(),
@@ -64,14 +64,14 @@ public class PackageService {
         return purchasedPackageRepository.save(purchasedPackage);
     }
 
-    private Date calculateExpiryDate(int durationValue, DurationType durationType) {
+    private LocalDateTime calculateExpiryDate(int durationValue, DurationType durationType) {
         Date date = new Date();
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         if (durationType == DurationType.MONTH) calendar.add(Calendar.MONTH, durationValue);
         if (durationType == DurationType.DAY) calendar.add(Calendar.DAY_OF_MONTH, durationValue);
 
-        return calendar.getTime();
+        return LocalDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
     }
 
     public List<PurchasedPackage> viewAllPackagesPurchased(Long userId) {

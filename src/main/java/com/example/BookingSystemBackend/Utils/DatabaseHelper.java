@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.Year;
 import java.util.Arrays;
 import java.util.List;
 
@@ -64,10 +67,10 @@ public class DatabaseHelper {
 
     public void saveClasses() {
         classRepository.saveAll(Arrays.asList(
-                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00"), 1, 1, 10, 10, ClassType.YOGA, Country.SINGAPORE),
-                new ClassInfo(Timestamp.valueOf("2025-02-24 17:00:00"), 2, 2, 10, 1, ClassType.PILATES, Country.SINGAPORE),
-                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00"), 1, 1, 10, 8, ClassType.YOGA, Country.MYANMAR),
-                new ClassInfo(Timestamp.valueOf("2025-02-24 17:00:00"), 2, 2, 10, 0, ClassType.PILATES, Country.MYANMAR)
+                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00").toLocalDateTime(), 1, 1, 10, 10, ClassType.YOGA, Country.SINGAPORE),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 17:00:00").toLocalDateTime(), 2, 2, 10, 1, ClassType.PILATES, Country.SINGAPORE),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00").toLocalDateTime(), 1, 1, 10, 8, ClassType.YOGA, Country.MYANMAR),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 1:30:00").toLocalDateTime(), 2, 2, 10, 0, ClassType.PILATES, Country.MYANMAR)
         ));
     }
 
@@ -80,9 +83,9 @@ public class DatabaseHelper {
         System.out.println("Line 77: " + allPackages);
 
         purchasedPackageRepository.saveAll(Arrays.asList(
-                new PurchasedPackage(40, Timestamp.valueOf("2025-02-20 17:00:00"), Timestamp.valueOf("2026-02-20 17:00:00"), false, allPackages.get(1), allUsers.get(0)),
+                new PurchasedPackage(40, Timestamp.valueOf("2025-02-20 17:00:00").toLocalDateTime(), Timestamp.valueOf("2026-02-20 17:00:00").toLocalDateTime(), false, allPackages.get(1), allUsers.get(0)),
 //                new PurchasedPackage(2, Timestamp.valueOf("2025-02-18 13:00:00"), Timestamp.valueOf("2025-03-05 13:00:00"), false, allPackages.get(0), allUsers.get(1)),
-                new PurchasedPackage(2, Timestamp.valueOf("2025-02-18 12:00:00"), Timestamp.valueOf("2025-03-05 12:00:00"), false, allPackages.get(2), allUsers.get(2))
+                new PurchasedPackage(2, Timestamp.valueOf("2025-02-18 12:00:00").toLocalDateTime(), Timestamp.valueOf("2025-03-05 12:00:00").toLocalDateTime(), false, allPackages.get(2), allUsers.get(2))
 //                new PurchasedPackage(2, Timestamp.valueOf("2025-02-21 17:00:00"), Timestamp.valueOf("2025-03-08 17:00:00"), false, allPackages.get(2), allUsers.get(3)),
 //                new PurchasedPackage(2, Timestamp.valueOf("2025-02-22 19:00:00"), Timestamp.valueOf("2025-03-09 19:00:00"), false, allPackages.get(2), allUsers.get(4))
         ));
@@ -95,9 +98,9 @@ public class DatabaseHelper {
         List<ClassInfo> allClasses = classRepository.findAll();
 
         bookedClassRepository.saveAll(Arrays.asList(
-                new BookedClass(Timestamp.valueOf("2025-02-20 19:00:00"), Timestamp.valueOf("2025-02-21 15:00:00"), true, true, false, allClasses.get(0), allUsers.get(0)),
-                new BookedClass(Timestamp.valueOf("2025-02-21 20:00:00"), null, false, false, false, allClasses.get(1), allUsers.get(0)),
-                new BookedClass(Timestamp.valueOf("2025-02-22 15:00:00"), null, false, false, false, allClasses.get(3), allUsers.get(2))
+                new BookedClass(Timestamp.valueOf("2025-02-20 19:00:00").toLocalDateTime(), Timestamp.valueOf("2025-02-21 15:00:00").toLocalDateTime(), true, true, false, allClasses.get(0), allUsers.get(0)),
+                new BookedClass(Timestamp.valueOf("2025-02-21 20:00:00").toLocalDateTime(), null, false, false, false, allClasses.get(1), allUsers.get(0)),
+                new BookedClass(Timestamp.valueOf("2025-02-22 15:00:00").toLocalDateTime(), null, false, false, false, allClasses.get(3), allUsers.get(2))
         ));
     }
 
@@ -108,8 +111,8 @@ public class DatabaseHelper {
         List<ClassInfo> allClasses = classRepository.findAll();
 
         waitlistRepository.saveAll(Arrays.asList(
-                new Waitlist(Timestamp.valueOf("2025-02-22 21:00:00"), allClasses.get(3), allUsers.get(3)),
-                new Waitlist(Timestamp.valueOf("2025-02-23 09:00:00"), allClasses.get(3), allUsers.get(4))
+                new Waitlist(Timestamp.valueOf("2025-02-22 21:00:00").toLocalDateTime(), allClasses.get(3), allUsers.get(3)),
+                new Waitlist(Timestamp.valueOf("2025-02-23 09:00:00").toLocalDateTime(), allClasses.get(3), allUsers.get(4))
         ));
     }
 }
