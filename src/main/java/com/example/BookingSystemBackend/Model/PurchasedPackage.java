@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -15,8 +16,8 @@ public class PurchasedPackage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long purchasedPackageId;
     private int creditsRemaining;
-    private Date purchaseDate;
-    private Date expiryDate;
+    private LocalDateTime purchaseDate;
+    private LocalDateTime expiryDate;
     private boolean isExpired;
     @ManyToOne
     private PackageBundle packageBundle;
@@ -24,8 +25,8 @@ public class PurchasedPackage {
     private User user;
 
     public PurchasedPackage(int creditsRemaining,
-                            Date purchaseDate,
-                            Date expiryDate,
+                            LocalDateTime purchaseDate,
+                            LocalDateTime expiryDate,
                             boolean isExpired,
                             PackageBundle packageBundle,
                             User user) {

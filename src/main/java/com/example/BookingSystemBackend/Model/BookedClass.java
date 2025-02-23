@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Data
@@ -14,8 +15,8 @@ public class BookedClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookedClassId;
-    private Timestamp bookingTimestamp;
-    private Timestamp cancelledTimestamp;
+    private LocalDateTime bookingTime;
+    private LocalDateTime cancelledTime;
     private boolean isCancelled;
     private boolean isRefunded;
     private boolean checkedIn;
@@ -24,15 +25,15 @@ public class BookedClass {
     @ManyToOne
     private User user;
 
-    public BookedClass(Timestamp bookingTimestamp,
-                       Timestamp cancelledTimestamp,
+    public BookedClass(LocalDateTime bookingTime,
+                       LocalDateTime cancelledTime,
                        boolean isCancelled,
                        boolean isRefunded,
                        boolean checkedIn,
                        ClassInfo classBooked,
                        User user) {
-        this.bookingTimestamp = bookingTimestamp;
-        this.cancelledTimestamp = cancelledTimestamp;
+        this.bookingTime = bookingTime;
+        this.cancelledTime = cancelledTime;
         this.isCancelled = isCancelled;
         this.isRefunded = isRefunded;
         this.checkedIn = checkedIn;

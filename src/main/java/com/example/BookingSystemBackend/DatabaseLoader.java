@@ -24,7 +24,7 @@ public class DatabaseLoader implements ApplicationRunner {
         databaseHelper.saveClasses();
         databaseHelper.savePurchasedPackages();
         databaseHelper.saveBookedClasses();
-        databaseHelper.saveWaitlist();
+//        databaseHelper.saveWaitlist();
 
     }
 }

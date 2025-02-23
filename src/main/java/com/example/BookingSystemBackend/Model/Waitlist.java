@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -14,13 +15,13 @@ public class Waitlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long waitlistId;
-    private Timestamp waitlistTimestamp;
+    private LocalDateTime waitlistTimestamp;
     @ManyToOne
     private ClassInfo classWaitlisted;
     @ManyToOne
     private User user;
 
-    public Waitlist(Timestamp waitlistTimestamp,
+    public Waitlist(LocalDateTime waitlistTimestamp,
                     ClassInfo classWaitlisted,
                     User user) {
         this.waitlistTimestamp = waitlistTimestamp;
