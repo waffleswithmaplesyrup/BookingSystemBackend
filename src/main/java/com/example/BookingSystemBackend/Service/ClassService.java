@@ -63,11 +63,7 @@ public class ClassService {
         if (hasBookedThisClass) throw new AlreadyBookedClassException();
 
         // check if class still have available slots
-        if (classInDB.get().getAvailableSlots() == 0) {
-            // add user to waitlist
-
-            throw new NoAvailableSlotsException();
-        }
+        if (classInDB.get().getAvailableSlots() == 0) throw new NoAvailableSlotsException();
 
         // after passing every check, confirm the booking
 
