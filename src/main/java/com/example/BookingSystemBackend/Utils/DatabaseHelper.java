@@ -81,10 +81,10 @@ public class DatabaseHelper {
 
         purchasedPackageRepository.saveAll(Arrays.asList(
                 new PurchasedPackage(40, Timestamp.valueOf("2025-02-20 17:00:00"), Timestamp.valueOf("2026-02-20 17:00:00"), false, allPackages.get(1), allUsers.get(0)),
-                new PurchasedPackage(2, Timestamp.valueOf("2025-02-18 13:00:00"), Timestamp.valueOf("2025-03-05 13:00:00"), false, allPackages.get(0), allUsers.get(1)),
-                new PurchasedPackage(2, Timestamp.valueOf("2025-02-18 12:00:00"), Timestamp.valueOf("2025-03-05 12:00:00"), false, allPackages.get(2), allUsers.get(2)),
-                new PurchasedPackage(2, Timestamp.valueOf("2025-02-21 17:00:00"), Timestamp.valueOf("2025-03-08 17:00:00"), false, allPackages.get(2), allUsers.get(3)),
-                new PurchasedPackage(2, Timestamp.valueOf("2025-02-22 19:00:00"), Timestamp.valueOf("2025-03-09 19:00:00"), false, allPackages.get(2), allUsers.get(4))
+//                new PurchasedPackage(2, Timestamp.valueOf("2025-02-18 13:00:00"), Timestamp.valueOf("2025-03-05 13:00:00"), false, allPackages.get(0), allUsers.get(1)),
+                new PurchasedPackage(2, Timestamp.valueOf("2025-02-18 12:00:00"), Timestamp.valueOf("2025-03-05 12:00:00"), false, allPackages.get(2), allUsers.get(2))
+//                new PurchasedPackage(2, Timestamp.valueOf("2025-02-21 17:00:00"), Timestamp.valueOf("2025-03-08 17:00:00"), false, allPackages.get(2), allUsers.get(3)),
+//                new PurchasedPackage(2, Timestamp.valueOf("2025-02-22 19:00:00"), Timestamp.valueOf("2025-03-09 19:00:00"), false, allPackages.get(2), allUsers.get(4))
         ));
     }
 
