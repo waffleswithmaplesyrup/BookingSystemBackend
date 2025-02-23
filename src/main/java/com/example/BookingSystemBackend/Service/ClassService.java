@@ -106,18 +106,38 @@ public class ClassService {
         cancelledBooking.setCancelled(true);
 
         if (getsRefund(cancelledBooking)) {
-            bookedClassInDB.get().setRefunded(true);
+            cancelledBooking.setRefunded(true);
 
             // give refund
-            refundCredits(bookedClassInDB.get().getUser(), bookedClassInDB.get().getClassBooked().getCreditsRequired());
+            refundCredits(cancelledBooking.getUser(), classCancelled.getCreditsRequired());
         }
 
         // check if there is a waitlist
-        // first in waitlist gets autobooked to class
+        Optional<Waitlist> firstOnWaitlist = waitlistRepository.getFirstOnWaitlist(classCancelled.getClassId());
 
-        // if no waitlist, available slots for the class is increased by 1
+        if(firstOnWaitlist.isPresent()) {
+            Timestamp bookingTimestamp = Timestamp.valueOf(LocalDateTime.now());
 
-        return bookedClassRepository.save(bookedClassInDB.get());
+            BookedClass bookedClass = new BookedClass(
+                    bookingTimestamp,
+                    null,
+                    false,
+                    false,
+                    false,
+                    firstOnWaitlist.get().getClassWaitlisted(),
+                    firstOnWaitlist.get().getUser()
+            );
+            // first in waitlist gets autobooked to class
+            bookedClassRepository.save(bookedClass);
+
+            // remove first on waitlist from the list
+            waitlistRepository.deleteById(firstOnWaitlist.get().getWaitlistId());
+        } else {
+            // if no waitlist, available slots for the class is increased by 1
+            classCancelled.setAvailableSlots(classCancelled.getAvailableSlots() + 1);
+        }
+
+        return bookedClassRepository.save(cancelledBooking);
     }
 
     public Waitlist addToWaitlist(BookingRequestDTO bookingRequestDTO) {
