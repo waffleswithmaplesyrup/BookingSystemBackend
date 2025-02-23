@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PurchasedPackageRepository extends JpaRepository<PurchasedPackage, Long> {
@@ -20,4 +21,11 @@ public interface PurchasedPackageRepository extends JpaRepository<PurchasedPacka
             "AND creditsRemaining >= :creditsRequired " +
             "ORDER BY expiryDate LIMIT 1")
     public PurchasedPackage findPackageToBookClassWith(@Param("userId") Long userId, @Param("creditsRequired") int creditsRequired);
+
+    @Query("SELECT p FROM PurchasedPackage p " +
+            "WHERE p.user.userId = :userId " +
+            "AND expiryDate > NOW() " +
+            "AND isExpired = false " +
+            "ORDER BY expiryDate DESC LIMIT 1")
+    public Optional<PurchasedPackage> findPackageToRefund(@Param("userId") Long userId);
 }

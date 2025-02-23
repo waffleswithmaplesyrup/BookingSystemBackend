@@ -2,23 +2,17 @@ package com.example.BookingSystemBackend.Service;
 
 import com.example.BookingSystemBackend.DTO.BookingRequestDTO;
 import com.example.BookingSystemBackend.Enum.Country;
-import com.example.BookingSystemBackend.Exception.AlreadyBookedClassException;
-import com.example.BookingSystemBackend.Exception.LocationMismatchException;
-import com.example.BookingSystemBackend.Exception.NoAvailableSlotsException;
-import com.example.BookingSystemBackend.Exception.NotEnoughCreditsException;
+import com.example.BookingSystemBackend.Enum.DurationType;
+import com.example.BookingSystemBackend.Exception.*;
 import com.example.BookingSystemBackend.Model.*;
-import com.example.BookingSystemBackend.Repository.BookedClassRepository;
-import com.example.BookingSystemBackend.Repository.ClassRepository;
-import com.example.BookingSystemBackend.Repository.PurchasedPackageRepository;
-import com.example.BookingSystemBackend.Repository.UserRepository;
+import com.example.BookingSystemBackend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ClassService {
@@ -27,16 +21,19 @@ public class ClassService {
     private final UserRepository userRepository;
     private final PurchasedPackageRepository purchasedPackageRepository;
     private final BookedClassRepository bookedClassRepository;
+    private final WaitlistRepository waitlistRepository;
 
     @Autowired
     public ClassService(ClassRepository classRepository,
                         UserRepository userRepository,
                         PurchasedPackageRepository purchasedPackageRepository,
-                        BookedClassRepository bookedClassRepository) {
+                        BookedClassRepository bookedClassRepository,
+                        WaitlistRepository waitlistRepository) {
         this.classRepository = classRepository;
         this.userRepository = userRepository;
         this.purchasedPackageRepository = purchasedPackageRepository;
         this.bookedClassRepository = bookedClassRepository;
+        this.waitlistRepository = waitlistRepository;
     }
 
     public List<ClassInfo> viewAllClasses(Country country) {
@@ -93,6 +90,61 @@ public class ClassService {
         );
         return bookedClassRepository.save(bookedClass);
     }
+
+    public BookedClass cancelBooking(Long bookedClassId) {
+
+        // check if booking exists
+        Optional<BookedClass> bookedClassInDB = bookedClassRepository.findById(bookedClassId);
+        if(bookedClassInDB.isEmpty()) throw new NoSuchElementException();
+
+        BookedClass cancelledBooking = bookedClassInDB.get();
+        ClassInfo classCancelled = cancelledBooking.getClassBooked();
+
+        // check if class is in the past
+        Date classTiming = new Date(classCancelled.getStartTimestamp().getTime());
+        Date cancellationTime = new Date();
+
+        if(cancellationTime.after(classTiming)) throw new InvalidTimeException();
+
+        cancelledBooking.setCancelledTimestamp(cancellationTime);
+        cancelledBooking.setCancelled(true);
+
+        if (getsRefund(cancelledBooking)) {
+            bookedClassInDB.get().setRefunded(true);
+
+            // give refund
+            refundCredits(bookedClassInDB.get().getUser(), bookedClassInDB.get().getClassBooked().getCreditsRequired());
+        }
+
+        // check if there is a waitlist
+        // first in waitlist gets autobooked to class
+
+        // if no waitlist, available slots for the class is increased by 1
+
+        return bookedClassRepository.save(bookedClassInDB.get());
+    }
+
+    private void refundCredits(User user, int creditsRefunded) {
+
+        // look for the purchased package that is the last to expire
+        Optional<PurchasedPackage> packageToRefund = purchasedPackageRepository.findPackageToRefund(user.getUserId());
+
+        if (packageToRefund.isPresent()) {
+            packageToRefund.get().setCreditsRemaining(packageToRefund.get().getCreditsRemaining() + creditsRefunded);
+
+            purchasedPackageRepository.save(packageToRefund.get());
+        }
+    }
+
+    private boolean getsRefund(BookedClass bookedClass) {
+        // check if the cancellation time is 4 hours or more before class start
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(bookedClass.getCancelledTimestamp());
+        calendar.add(Calendar.HOUR, 4);
+        Date afterFourHours = calendar.getTime();
+        return afterFourHours.before(bookedClass.getClassBooked().getStartTimestamp());
+    }
+
 
     private void updateAvailableSlot(ClassInfo classInfo) {
 

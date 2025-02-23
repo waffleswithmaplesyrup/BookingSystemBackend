@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 @Entity
 @Data
@@ -14,8 +14,8 @@ public class BookedClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookedClassId;
-    private Timestamp bookingTimestamp;
-    private Timestamp cancelledTimestamp;
+    private Date bookingTimestamp;
+    private Date cancelledTimestamp;
     private boolean isCancelled;
     private boolean isRefunded;
     private boolean checkedIn;
@@ -24,8 +24,8 @@ public class BookedClass {
     @ManyToOne
     private User user;
 
-    public BookedClass(Timestamp bookingTimestamp,
-                       Timestamp cancelledTimestamp,
+    public BookedClass(Date bookingTimestamp,
+                       Date cancelledTimestamp,
                        boolean isCancelled,
                        boolean isRefunded,
                        boolean checkedIn,

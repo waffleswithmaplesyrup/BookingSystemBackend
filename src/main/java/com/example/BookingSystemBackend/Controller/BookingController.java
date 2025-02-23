@@ -2,13 +2,9 @@ package com.example.BookingSystemBackend.Controller;
 
 import com.example.BookingSystemBackend.DTO.BookingRequestDTO;
 import com.example.BookingSystemBackend.Enum.Country;
-import com.example.BookingSystemBackend.Exception.AlreadyBookedClassException;
-import com.example.BookingSystemBackend.Exception.LocationMismatchException;
-import com.example.BookingSystemBackend.Exception.NoAvailableSlotsException;
-import com.example.BookingSystemBackend.Exception.NotEnoughCreditsException;
+import com.example.BookingSystemBackend.Exception.*;
 import com.example.BookingSystemBackend.Model.BookedClass;
 import com.example.BookingSystemBackend.Model.ClassInfo;
-import com.example.BookingSystemBackend.Model.PackageBundle;
 import com.example.BookingSystemBackend.Service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -55,6 +51,32 @@ public class BookingController {
 
             return ResponseEntity.badRequest().body(errorResponse);
         }catch (NoSuchElementException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", "class or user not found");
+
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/cancel={bookedClassId}")
+    public ResponseEntity<?> cancelBooking(@PathVariable Long bookedClassId) {
+        try {
+            BookedClass cancelledClass = classService.cancelBooking(bookedClassId);
+
+            Map<String, Object> successResponse = new HashMap<>();
+            successResponse.put("status", "success");
+            successResponse.put("message", "class cancelled successfully");
+            successResponse.put("data", cancelledClass);
+
+            return ResponseEntity.ok().body(successResponse);
+        } catch (InvalidTimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (NoSuchElementException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
             errorResponse.put("message", "class or user not found");

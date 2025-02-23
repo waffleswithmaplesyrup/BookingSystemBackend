@@ -64,10 +64,10 @@ public class DatabaseHelper {
 
     public void saveClasses() {
         classRepository.saveAll(Arrays.asList(
-                new ClassInfo(Timestamp.valueOf("2025-02-23 18:00:00"), 1, 1, 10, 10, ClassType.YOGA, Country.SINGAPORE),
-                new ClassInfo(Timestamp.valueOf("2025-02-23 17:00:00"), 2, 2, 10, 1, ClassType.PILATES, Country.SINGAPORE),
-                new ClassInfo(Timestamp.valueOf("2025-02-23 18:00:00"), 1, 1, 10, 8, ClassType.YOGA, Country.MYANMAR),
-                new ClassInfo(Timestamp.valueOf("2025-02-23 17:00:00"), 2, 2, 10, 0, ClassType.PILATES, Country.MYANMAR)
+                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00"), 1, 1, 10, 10, ClassType.YOGA, Country.SINGAPORE),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 17:00:00"), 2, 2, 10, 1, ClassType.PILATES, Country.SINGAPORE),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00"), 1, 1, 10, 8, ClassType.YOGA, Country.MYANMAR),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 17:00:00"), 2, 2, 10, 0, ClassType.PILATES, Country.MYANMAR)
         ));
     }
 
