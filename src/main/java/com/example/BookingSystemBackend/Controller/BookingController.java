@@ -44,19 +44,18 @@ public class BookingController {
             successResponse.put("data", bookingClass);
 
             return new ResponseEntity<>(successResponse, HttpStatus.CREATED);
-        } catch (LocationMismatchException | NotEnoughCreditsException |
-                 NoAvailableSlotsException | AlreadyBookedClassException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", e.getMessage());
-
-            return ResponseEntity.badRequest().body(errorResponse);
-        }catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("status", "error");
             errorResponse.put("message", "class or user not found");
 
             return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 

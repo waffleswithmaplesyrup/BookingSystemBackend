@@ -19,6 +19,7 @@ public class ClassInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long classId;
     private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private int duration;
     private int creditsRequired;
     private int classSize;
@@ -29,6 +30,7 @@ public class ClassInfo {
     private Country country;
 
     public ClassInfo(LocalDateTime startTime,
+                     LocalDateTime endTime,
                      int duration,
                      int creditsRequired,
                      int classSize,
@@ -36,6 +38,7 @@ public class ClassInfo {
                      ClassType classType,
                      Country country) {
         this.startTime = startTime;
+        this.endTime = endTime;
         this.duration = duration;
         this.creditsRequired = creditsRequired;
         this.classSize = classSize;

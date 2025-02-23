@@ -67,10 +67,10 @@ public class DatabaseHelper {
 
     public void saveClasses() {
         classRepository.saveAll(Arrays.asList(
-                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00").toLocalDateTime(), 1, 1, 10, 10, ClassType.YOGA, Country.SINGAPORE),
-                new ClassInfo(Timestamp.valueOf("2025-02-24 17:00:00").toLocalDateTime(), 2, 2, 10, 1, ClassType.PILATES, Country.SINGAPORE),
-                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00").toLocalDateTime(), 1, 1, 10, 8, ClassType.YOGA, Country.MYANMAR),
-                new ClassInfo(Timestamp.valueOf("2025-02-24 1:30:00").toLocalDateTime(), 2, 2, 10, 0, ClassType.PILATES, Country.MYANMAR)
+                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00").toLocalDateTime(), Timestamp.valueOf("2025-02-24 19:00:00").toLocalDateTime(), 1, 1, 10, 10, ClassType.YOGA, Country.SINGAPORE),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 17:00:00").toLocalDateTime(), Timestamp.valueOf("2025-02-24 19:00:00").toLocalDateTime(), 2, 2, 10, 1, ClassType.PILATES, Country.SINGAPORE),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 18:00:00").toLocalDateTime(), Timestamp.valueOf("2025-02-24 19:00:00").toLocalDateTime(), 1, 1, 10, 8, ClassType.YOGA, Country.MYANMAR),
+                new ClassInfo(Timestamp.valueOf("2025-02-24 17:30:00").toLocalDateTime(), Timestamp.valueOf("2025-02-24 19:30:00").toLocalDateTime(), 2, 2, 10, 1, ClassType.PILATES, Country.MYANMAR)
         ));
     }
 

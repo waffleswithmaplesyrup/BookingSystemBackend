@@ -9,10 +9,12 @@ import com.example.BookingSystemBackend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.awt.print.Book;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -63,6 +65,11 @@ public class ClassService {
         boolean hasBookedThisClass =  bookedClassRepository.numberOfBookingsMadeToThisClass(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()) >= 1;
         if (hasBookedThisClass) throw new AlreadyBookedClassException();
 
+        // check if user has other classes that overlap with the timing
+        int overlappingClasses = bookedClassRepository.overlappingClasses(userInDB.get().getUserId(), classInDB.get().getStartTime(), classInDB.get().getEndTime());
+
+        if(overlappingClasses > 0) throw new RuntimeException("class schedule clash with another class");
+
         // check if class still have available slots
         if (classInDB.get().getAvailableSlots() == 0) throw new NoAvailableSlotsException();
 
@@ -98,8 +105,6 @@ public class ClassService {
         ClassInfo classCancelled = cancelledBooking.getClassBooked();
 
         // check if class is in the past
-//        Date classTiming = new Date(classCancelled.getStartTimestamp().getTime());
-//        Date cancellationTime = new Date();
 
         LocalDateTime classTiming = classCancelled.getStartTime();
         LocalDateTime cancellationTime = LocalDateTime.now();
@@ -168,6 +173,11 @@ public class ClassService {
 
         // check if class has available slots
         if(classInDB.get().getAvailableSlots() > 0) throw new RuntimeException("Class still has available slots. Book class now.");
+
+        // check if user has other classes that overlap with the timing
+        int overlappingClasses = bookedClassRepository.overlappingClasses(userInDB.get().getUserId(), classInDB.get().getStartTime(), classInDB.get().getEndTime());
+
+        if(overlappingClasses > 0) throw new RuntimeException("class schedule clash with another class");
 
         // after passing every check, confirm the booking
 
