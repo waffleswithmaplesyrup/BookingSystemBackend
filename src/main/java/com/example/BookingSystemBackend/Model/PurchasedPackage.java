@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 @Entity
 @Data
@@ -15,8 +15,8 @@ public class PurchasedPackage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long purchasedPackageId;
     private int creditsRemaining;
-    private Timestamp purchaseDate;
-    private Timestamp expiryDate;
+    private Date purchaseDate;
+    private Date expiryDate;
     private boolean isExpired;
     @ManyToOne
     private PackageBundle packageBundle;
@@ -24,8 +24,8 @@ public class PurchasedPackage {
     private User user;
 
     public PurchasedPackage(int creditsRemaining,
-                            Timestamp purchaseDate,
-                            Timestamp expiryDate,
+                            Date purchaseDate,
+                            Date expiryDate,
                             boolean isExpired,
                             PackageBundle packageBundle,
                             User user) {
