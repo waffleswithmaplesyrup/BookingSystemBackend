@@ -124,6 +124,46 @@ public class ClassService {
         return bookedClassRepository.save(bookedClassInDB.get());
     }
 
+    public Waitlist addToWaitlist(BookingRequestDTO bookingRequestDTO) {
+        // check if class and user exists in db
+        Optional<ClassInfo> classInDB = classRepository.findById(bookingRequestDTO.getClassId());
+        Optional<User> userInDB = userRepository.findById(bookingRequestDTO.getUserId());
+
+        if (classInDB.isEmpty() || userInDB.isEmpty()) throw new NoSuchElementException("class or user not found");
+
+        // check if class country matches with user's country
+        if (classInDB.get().getCountry() != userInDB.get().getCountry()) throw new LocationMismatchException(classInDB.get().getCountry());
+
+        // check if user has bought a package and the package has not expired yet and there is enough credits
+        // sort by expiry_date so that the package that is expiring is first and then return the first entry
+        PurchasedPackage packageAvailable = purchasedPackageRepository.findPackageToBookClassWith(bookingRequestDTO.getUserId(), classInDB.get().getCreditsRequired());
+
+        // if no available package, then throw exception
+        if (packageAvailable == null) throw new NotEnoughCreditsException();
+
+        // check if user has already booked this class
+        boolean hasBookedThisClass =  bookedClassRepository.numberOfBookingsMadeToThisClass(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()) >= 1;
+        boolean isAlreadyInWaitlist = !waitlistRepository.findAllByUser_UserIdAndClassWaitlisted_ClassId(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()).isEmpty();
+        if (hasBookedThisClass || isAlreadyInWaitlist) throw new AlreadyBookedClassException();
+
+        // check if class has available slots
+        if(classInDB.get().getAvailableSlots() > 0) throw new RuntimeException("Class still has available slots. Book class now.");
+
+        // after passing every check, confirm the booking
+
+        // update the credits remaining in purchased package
+        updateCreditsRemaining(packageAvailable, classInDB.get().getCreditsRequired());
+
+        Timestamp waitlistTimestamp = Timestamp.valueOf(LocalDateTime.now());
+
+        Waitlist waitlist = new Waitlist(
+                waitlistTimestamp,
+                classInDB.get(),
+                userInDB.get()
+        );
+        return waitlistRepository.save(waitlist);
+    }
+
     private void refundCredits(User user, int creditsRefunded) {
 
         // look for the purchased package that is the last to expire

@@ -5,6 +5,7 @@ import com.example.BookingSystemBackend.Enum.Country;
 import com.example.BookingSystemBackend.Exception.*;
 import com.example.BookingSystemBackend.Model.BookedClass;
 import com.example.BookingSystemBackend.Model.ClassInfo;
+import com.example.BookingSystemBackend.Model.Waitlist;
 import com.example.BookingSystemBackend.Service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -82,6 +83,26 @@ public class BookingController {
             errorResponse.put("message", "class or user not found");
 
             return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/waitlist")
+    public ResponseEntity<?> addToWaitlist(@RequestBody BookingRequestDTO bookingRequestDTO) {
+        try {
+            Waitlist waitlist = classService.addToWaitlist(bookingRequestDTO);
+
+            Map<String, Object> successResponse = new HashMap<>();
+            successResponse.put("status", "success");
+            successResponse.put("message", "added to waitlist successfully");
+            successResponse.put("data", waitlist);
+
+            return new ResponseEntity<>(successResponse, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("status", "error");
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 }
