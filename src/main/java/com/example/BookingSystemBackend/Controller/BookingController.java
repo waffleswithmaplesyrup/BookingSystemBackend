@@ -28,11 +28,6 @@ public class BookingController {
         this.classService = classService;
     }
 
-    @GetMapping("/country={country}")
-    public ResponseEntity<List<ClassInfo>> viewAllClasses(@PathVariable Country country) {
-        return ResponseEntity.ok().body(classService.viewAllClasses(country));
-    }
-
     @PostMapping("/book-class")
     public ResponseEntity<?> bookClass(@RequestBody BookingRequestDTO bookingRequestDTO) {
         try {
