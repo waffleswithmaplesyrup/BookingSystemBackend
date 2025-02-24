@@ -9,7 +9,9 @@ import com.example.BookingSystemBackend.Repository.*;
 import com.example.BookingSystemBackend.Utils.ZoneDateTimeHelper;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -27,6 +29,9 @@ public class ClassService {
     private final WaitlistRepository waitlistRepository;
     private final ZoneDateTimeHelper zoneDateTimeHelper;
     private final QuartzSchedulerService quartzSchedulerService;
+    private final RedisTemplate<String, Object> redisTemplate;
+
+    private static final String BOOKING_LOCK_KEY = "booking_lock:";
 
     @Autowired
     public ClassService(ClassRepository classRepository,
@@ -35,7 +40,8 @@ public class ClassService {
                         BookedClassRepository bookedClassRepository,
                         WaitlistRepository waitlistRepository,
                         ZoneDateTimeHelper zoneDateTimeHelper,
-                        QuartzSchedulerService quartzSchedulerService) {
+                        QuartzSchedulerService quartzSchedulerService,
+                        RedisTemplate<String, Object> redisTemplate) {
         this.classRepository = classRepository;
         this.userRepository = userRepository;
         this.purchasedPackageRepository = purchasedPackageRepository;
@@ -43,6 +49,7 @@ public class ClassService {
         this.waitlistRepository = waitlistRepository;
         this.zoneDateTimeHelper = zoneDateTimeHelper;
         this.quartzSchedulerService = quartzSchedulerService;
+        this.redisTemplate = redisTemplate;
     }
 
     public ClassInfo createNewClassSchedule(NewClassRequestDTO newClassRequestDTO) {
@@ -78,56 +85,70 @@ public class ClassService {
         return classRepository.findAllByCountry(country);
     }
 
+    @Transactional
     public BookedClass bookClass(BookingRequestDTO bookingRequestDTO) {
 
-        // check if class and user exists in db
-        Optional<ClassInfo> classInDB = classRepository.findById(bookingRequestDTO.getClassId());
-        Optional<User> userInDB = userRepository.findById(bookingRequestDTO.getUserId());
+        Long classId = bookingRequestDTO.getClassId();
+        String lockKey = BOOKING_LOCK_KEY + classId;
 
-        if (classInDB.isEmpty() || userInDB.isEmpty()) throw new NoSuchElementException();
+        // lock with expiration (prevents deadlock if something fails)
+        Boolean locked = redisTemplate.opsForValue().setIfAbsent(lockKey, "locked", Duration.ofSeconds(10));
 
-        // check if class country matches with user's country
-        if (classInDB.get().getCountry() != userInDB.get().getCountry()) throw new LocationMismatchException(classInDB.get().getCountry());
+        if (Boolean.FALSE.equals(locked)) throw new RuntimeException("Class is currently being booked. Please try again later.");
 
-        // check if user has bought a package and the package has not expired yet and there is enough credits
-        // sort by expiry_date so that the package that is expiring is first and then return the first entry
-        PurchasedPackage packageAvailable = purchasedPackageRepository.findPackageToBookClassWith(bookingRequestDTO.getUserId(), classInDB.get().getCreditsRequired());
+        try {
+            // check if class and user exists in db
+            Optional<ClassInfo> classInDB = classRepository.findById(bookingRequestDTO.getClassId());
+            Optional<User> userInDB = userRepository.findById(bookingRequestDTO.getUserId());
 
-        // if no available package, then throw exception
-        if (packageAvailable == null) throw new NotEnoughCreditsException();
+            if (classInDB.isEmpty() || userInDB.isEmpty()) throw new NoSuchElementException();
 
-        // check if user has already booked this class
-        boolean hasBookedThisClass =  bookedClassRepository.numberOfBookingsMadeToThisClass(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()) >= 1;
-        if (hasBookedThisClass) throw new AlreadyBookedClassException();
+            // check if class country matches with user's country
+            if (classInDB.get().getCountry() != userInDB.get().getCountry()) throw new LocationMismatchException(classInDB.get().getCountry());
 
-        // check if user has other classes that overlap with the timing
-        int overlappingClasses = bookedClassRepository.overlappingClasses(userInDB.get().getUserId(), classInDB.get().getStartTime(), classInDB.get().getEndTime());
+            // check if user has bought a package and the package has not expired yet and there is enough credits
+            // sort by expiry_date so that the package that is expiring is first and then return the first entry
+            PurchasedPackage packageAvailable = purchasedPackageRepository.findPackageToBookClassWith(bookingRequestDTO.getUserId(), classInDB.get().getCreditsRequired());
 
-        if(overlappingClasses > 0) throw new RuntimeException("class schedule clash with another class");
+            // if no available package, then throw exception
+            if (packageAvailable == null) throw new NotEnoughCreditsException();
 
-        // check if class still have available slots
-        if (classInDB.get().getAvailableSlots() == 0) throw new NoAvailableSlotsException();
+            // check if user has already booked this class
+            boolean hasBookedThisClass =  bookedClassRepository.numberOfBookingsMadeToThisClass(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()) >= 1;
+            if (hasBookedThisClass) throw new AlreadyBookedClassException();
 
-        // after passing every check, confirm the booking
+            // check if user has other classes that overlap with the timing
+            int overlappingClasses = bookedClassRepository.overlappingClasses(userInDB.get().getUserId(), classInDB.get().getStartTime(), classInDB.get().getEndTime());
 
-        // update the class available slot
-        updateAvailableSlot(classInDB.get());
+            if(overlappingClasses > 0) throw new RuntimeException("class schedule clash with another class");
 
-        // update the credits remaining in purchased package
-        updateCreditsRemaining(packageAvailable, classInDB.get().getCreditsRequired());
+            // check if class still have available slots
+            if (classInDB.get().getAvailableSlots() == 0) throw new NoAvailableSlotsException();
 
-        ZonedDateTime bookingTimestamp = ZonedDateTime.now();
+            // after passing every check, confirm the booking
 
-        BookedClass bookedClass = new BookedClass(
-                bookingTimestamp,
-                null,
-                false,
-                false,
-                false,
-                classInDB.get(),
-                userInDB.get()
-        );
-        return bookedClassRepository.save(bookedClass);
+            // update the class available slot
+            updateAvailableSlot(classInDB.get());
+
+            // update the credits remaining in purchased package
+            updateCreditsRemaining(packageAvailable, classInDB.get().getCreditsRequired());
+
+            ZonedDateTime bookingTimestamp = ZonedDateTime.now();
+
+            // save booking record
+            BookedClass bookedClass = new BookedClass(
+                    bookingTimestamp,
+                    null,
+                    false,
+                    false,
+                    false,
+                    classInDB.get(),
+                    userInDB.get()
+            );
+            return bookedClassRepository.save(bookedClass);
+        } finally {
+            redisTemplate.delete(lockKey);  // release the lock
+        }
     }
 
     public BookedClass cancelBooking(Long bookedClassId) {
