@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Repository
@@ -20,5 +21,5 @@ public interface BookedClassRepository extends JpaRepository<BookedClass, Long> 
     @Query("SELECT count(b) FROM BookedClass b " +
             "WHERE b.user.userId = :userId AND b.isCancelled = false AND " +
             "b.classBooked.startTime between :startTime and :classEndTime")
-    public int overlappingClasses(@Param("userId") Long userId, @Param("startTime") LocalDateTime startTime, @Param("classEndTime") LocalDateTime classEndTime);
+    public int overlappingClasses(@Param("userId") Long userId, @Param("startTime") ZonedDateTime startTime, @Param("classEndTime") ZonedDateTime classEndTime);
 }

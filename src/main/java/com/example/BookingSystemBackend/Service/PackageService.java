@@ -10,11 +10,14 @@ import com.example.BookingSystemBackend.Model.User;
 import com.example.BookingSystemBackend.Repository.PackageRepository;
 import com.example.BookingSystemBackend.Repository.PurchasedPackageRepository;
 import com.example.BookingSystemBackend.Repository.UserRepository;
+import com.example.BookingSystemBackend.Utils.ZoneDateTimeHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -23,14 +26,17 @@ public class PackageService {
     private final PackageRepository packageRepository;
     private final PurchasedPackageRepository purchasedPackageRepository;
     private final UserRepository userRepository;
+    private final ZoneDateTimeHelper zoneDateTimeHelper;
 
     @Autowired
     public PackageService(PackageRepository packageRepository,
                           PurchasedPackageRepository purchasedPackageRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          ZoneDateTimeHelper zoneDateTimeHelper) {
         this.packageRepository = packageRepository;
         this.purchasedPackageRepository = purchasedPackageRepository;
         this.userRepository = userRepository;
+        this.zoneDateTimeHelper = zoneDateTimeHelper;
     }
 
     public List<PackageBundle> viewAllPackages(Country country) {
@@ -48,9 +54,9 @@ public class PackageService {
         // check if package country matches with user's country
         if (packageinDB.get().getCountry() != userInDB.get().getCountry()) throw new LocationMismatchException(packageinDB.get().getCountry());
 
-        LocalDateTime purchaseDate = LocalDateTime.now();
+        ZonedDateTime purchaseDate = zoneDateTimeHelper.calculatePurchaseDate(userInDB.get().getCountry());
 
-        LocalDateTime expiryDate = calculateExpiryDate(packageinDB.get().getDurationValue(), packageinDB.get().getDurationType());
+        ZonedDateTime expiryDate = zoneDateTimeHelper.calculateExpiryDate(packageinDB.get().getCountry(), packageinDB.get().getDurationValue(), packageinDB.get().getDurationType());
 
         PurchasedPackage purchasedPackage = new PurchasedPackage(
                 packageinDB.get().getCredits(),
@@ -62,16 +68,6 @@ public class PackageService {
         );
 
         return purchasedPackageRepository.save(purchasedPackage);
-    }
-
-    private LocalDateTime calculateExpiryDate(int durationValue, DurationType durationType) {
-        Date date = new Date();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        if (durationType == DurationType.MONTH) calendar.add(Calendar.MONTH, durationValue);
-        if (durationType == DurationType.DAY) calendar.add(Calendar.DAY_OF_MONTH, durationValue);
-
-        return LocalDateTime.ofInstant(calendar.toInstant(), calendar.getTimeZone().toZoneId());
     }
 
     public List<PurchasedPackage> viewAllPackagesPurchased(Long userId) {

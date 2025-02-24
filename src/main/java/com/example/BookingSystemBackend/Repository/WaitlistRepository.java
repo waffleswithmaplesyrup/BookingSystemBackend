@@ -17,4 +17,6 @@ public interface WaitlistRepository extends JpaRepository<Waitlist, Long> {
             "WHERE w.classWaitlisted.classId = :classId " +
             "ORDER BY waitlistTimestamp LIMIT 1")
     public Optional<Waitlist> getFirstOnWaitlist(@Param("classId") Long classId);
+
+    public List<Waitlist> findAllByClassWaitlisted_ClassId(Long classId);
 }
