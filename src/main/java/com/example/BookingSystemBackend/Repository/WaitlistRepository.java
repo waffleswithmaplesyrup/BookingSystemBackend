@@ -11,12 +11,12 @@ import java.util.Optional;
 
 @Repository
 public interface WaitlistRepository extends JpaRepository<Waitlist, Long> {
-    public List<Waitlist> findAllByUser_UserIdAndClassWaitlisted_ClassId(Long userId, Long classId);
+    public List<Waitlist> findAllByUser_UserIdAndClassInfo_ClassId(Long userId, Long classId);
 
     @Query("SELECT w FROM Waitlist w " +
-            "WHERE w.classWaitlisted.classId = :classId " +
+            "WHERE w.classInfo.classId = :classId " +
             "ORDER BY waitlistTimestamp LIMIT 1")
     public Optional<Waitlist> getFirstOnWaitlist(@Param("classId") Long classId);
 
-    public List<Waitlist> findAllByClassWaitlisted_ClassId(Long classId);
+    public List<Waitlist> findAllByClassInfo_ClassId(Long classId);
 }

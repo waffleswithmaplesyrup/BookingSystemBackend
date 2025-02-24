@@ -15,11 +15,11 @@ public interface BookedClassRepository extends JpaRepository<BookedClass, Long> 
 
     @Query("SELECT count(b) FROM BookedClass b " +
             "WHERE b.user.userId = :userId " +
-            "AND b.classBooked.classId = :classId")
+            "AND b.classInfo.classId = :classId")
     public int numberOfBookingsMadeToThisClass(@Param("userId") Long userId, @Param("classId") Long classId);
 
     @Query("SELECT count(b) FROM BookedClass b " +
             "WHERE b.user.userId = :userId AND b.isCancelled = false AND " +
-            "b.classBooked.startTime between :startTime and :classEndTime")
+            "b.classInfo.startTime between :startTime and :classEndTime")
     public int overlappingClasses(@Param("userId") Long userId, @Param("startTime") ZonedDateTime startTime, @Param("classEndTime") ZonedDateTime classEndTime);
 }

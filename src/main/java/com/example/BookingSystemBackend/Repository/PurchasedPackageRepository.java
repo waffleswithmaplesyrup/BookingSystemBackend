@@ -1,6 +1,5 @@
 package com.example.BookingSystemBackend.Repository;
 
-import com.example.BookingSystemBackend.Model.PackageBundle;
 import com.example.BookingSystemBackend.Model.PurchasedPackage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

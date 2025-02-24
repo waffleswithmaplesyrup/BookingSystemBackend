@@ -2,9 +2,8 @@ package com.example.BookingSystemBackend.Service;
 
 import com.example.BookingSystemBackend.DTO.PurchaseRequestDTO;
 import com.example.BookingSystemBackend.Enum.Country;
-import com.example.BookingSystemBackend.Enum.DurationType;
 import com.example.BookingSystemBackend.Exception.LocationMismatchException;
-import com.example.BookingSystemBackend.Model.PackageBundle;
+import com.example.BookingSystemBackend.Model.PackageInfo;
 import com.example.BookingSystemBackend.Model.PurchasedPackage;
 import com.example.BookingSystemBackend.Model.User;
 import com.example.BookingSystemBackend.Repository.PackageRepository;
@@ -14,9 +13,6 @@ import com.example.BookingSystemBackend.Utils.ZoneDateTimeHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -39,14 +35,14 @@ public class PackageService {
         this.zoneDateTimeHelper = zoneDateTimeHelper;
     }
 
-    public List<PackageBundle> viewAllPackages(Country country) {
+    public List<PackageInfo> viewAllPackages(Country country) {
         return packageRepository.findAllByCountry(country);
     }
 
     public PurchasedPackage purchasePackage(PurchaseRequestDTO purchaseRequestDTO) {
 
         // check if package and user exists in db
-        Optional<PackageBundle> packageinDB = packageRepository.findById(purchaseRequestDTO.getPackageId());
+        Optional<PackageInfo> packageinDB = packageRepository.findById(purchaseRequestDTO.getPackageId());
         Optional<User> userInDB = userRepository.findById(purchaseRequestDTO.getUserId());
 
         if (packageinDB.isEmpty() || userInDB.isEmpty()) throw new NoSuchElementException();

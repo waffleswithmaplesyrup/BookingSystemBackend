@@ -17,15 +17,17 @@ public class Waitlist {
     private Long waitlistId;
     private LocalDateTime waitlistTimestamp;
     @ManyToOne
-    private ClassInfo classWaitlisted;
+    @JoinColumn(name = "FK_classId")
+    private ClassInfo classInfo;
     @ManyToOne
+    @JoinColumn(name = "FK_userId")
     private User user;
 
     public Waitlist(LocalDateTime waitlistTimestamp,
-                    ClassInfo classWaitlisted,
+                    ClassInfo classInfo,
                     User user) {
         this.waitlistTimestamp = waitlistTimestamp;
-        this.classWaitlisted = classWaitlisted;
+        this.classInfo = classInfo;
         this.user = user;
     }
 }

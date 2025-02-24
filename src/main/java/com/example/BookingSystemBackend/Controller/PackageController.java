@@ -3,16 +3,14 @@ package com.example.BookingSystemBackend.Controller;
 import com.example.BookingSystemBackend.DTO.PurchaseRequestDTO;
 import com.example.BookingSystemBackend.Enum.Country;
 import com.example.BookingSystemBackend.Exception.LocationMismatchException;
-import com.example.BookingSystemBackend.Model.PackageBundle;
+import com.example.BookingSystemBackend.Model.PackageInfo;
 import com.example.BookingSystemBackend.Model.PurchasedPackage;
 import com.example.BookingSystemBackend.Service.PackageService;
-import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +28,7 @@ public class PackageController {
     }
 
     @GetMapping("/country={country}")
-    public ResponseEntity<List<PackageBundle>> viewAllPackages(@PathVariable Country country) {
+    public ResponseEntity<List<PackageInfo>> viewAllPackages(@PathVariable Country country) {
         return ResponseEntity.ok().body(packageService.viewAllPackages(country));
     }
 
