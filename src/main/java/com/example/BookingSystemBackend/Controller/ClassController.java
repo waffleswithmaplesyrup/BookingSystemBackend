@@ -2,17 +2,16 @@ package com.example.BookingSystemBackend.Controller;
 
 import com.example.BookingSystemBackend.DTO.BookingRequestDTO;
 import com.example.BookingSystemBackend.DTO.NewClassRequestDTO;
+import com.example.BookingSystemBackend.Enum.Country;
 import com.example.BookingSystemBackend.Model.ClassInfo;
 import com.example.BookingSystemBackend.Service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,6 +23,11 @@ public class ClassController {
     @Autowired
     public ClassController(ClassService classService) {
         this.classService = classService;
+    }
+
+    @GetMapping("/country={country}")
+    public ResponseEntity<List<ClassInfo>> viewAllClasses(@PathVariable Country country) {
+        return ResponseEntity.ok().body(classService.viewAllClasses(country));
     }
 
     @PostMapping("/create")

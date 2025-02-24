@@ -11,6 +11,7 @@ import com.example.BookingSystemBackend.Exception.PasswordTooShortException;
 import com.example.BookingSystemBackend.Model.User;
 import com.example.BookingSystemBackend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -22,12 +23,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(UserRepository userRepository,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User registerUser(UserRequestDTO userRequestDTO) {
@@ -43,7 +47,7 @@ public class UserService {
 
         User newUser = new User(userRequestDTO.getUsername(),
                 userRequestDTO.getEmail(),
-                userRequestDTO.getPassword(),
+                passwordEncoder.encode(userRequestDTO.getPassword()),
                 Role.CUSTOMER,
                 userRequestDTO.getCountry());
 
@@ -58,17 +62,14 @@ public class UserService {
 
     public void changePassword(ChangePasswordRequestDTO changePasswordRequestDTO) {
 
-        //! hash password with bcrypt after setting up security
-
         User userInDB = checkIfUserExists(changePasswordRequestDTO.getUserId());
 
         passwordLengthCheck(changePasswordRequestDTO.getNewPassword());
 
         // check if old password entered matches password in db
-        if (!Objects.equals(changePasswordRequestDTO.getOldPassword(), userInDB.getPassword())) throw new CredentialsMismatchException();
+        if (changePasswordRequestDTO.getOldPassword().equals(userInDB.getPassword())) throw new CredentialsMismatchException();
 
-        //! hash password with bcrypt after setting up security
-        userInDB.setPassword(changePasswordRequestDTO.getNewPassword());
+        userInDB.setPassword(passwordEncoder.encode(changePasswordRequestDTO.getNewPassword()));
 
         userRepository.save(userInDB);
     }
@@ -82,7 +83,7 @@ public class UserService {
 
         passwordLengthCheck(resetPasswordRequest.getNewPassword());
 
-        userInDB.setPassword(resetPasswordRequest.getNewPassword());
+        userInDB.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
 
         userRepository.save(userInDB);
     }

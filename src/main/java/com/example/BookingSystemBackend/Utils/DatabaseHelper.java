@@ -6,6 +6,7 @@ import com.example.BookingSystemBackend.Model.ClassInfo;
 import com.example.BookingSystemBackend.Model.PackageBundle;
 import com.example.BookingSystemBackend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -24,6 +25,7 @@ public class DatabaseHelper {
     private final BookedClassRepository bookedClassRepository;
     private final WaitlistRepository waitlistRepository;
     private final ZoneDateTimeHelper zoneDateTimeHelper;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public DatabaseHelper(
@@ -33,7 +35,8 @@ public class DatabaseHelper {
             PurchasedPackageRepository purchasedPackageRepository,
             BookedClassRepository bookedClassRepository,
             WaitlistRepository waitlistRepository,
-            ZoneDateTimeHelper zoneDateTimeHelper
+            ZoneDateTimeHelper zoneDateTimeHelper,
+            PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
         this.packageRepository = packageRepository;
@@ -42,18 +45,17 @@ public class DatabaseHelper {
         this.bookedClassRepository = bookedClassRepository;
         this.waitlistRepository = waitlistRepository;
         this.zoneDateTimeHelper = zoneDateTimeHelper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void saveUsers() {
 
-        //! encode password after adding security dependency
-
         userRepository.saveAll(Arrays.asList(
-                new User("Howard", "hamlin@gmail.com", "password", Role.CUSTOMER, Country.SINGAPORE),
-                new User("Jimmy", "mcgill@gmail.com", "password", Role.CUSTOMER, Country.SINGAPORE),
-                new User("Kim", "wexler@gmail.com", "password", Role.CUSTOMER, Country.MYANMAR),
-                new User("Chuck", "chuck@gmail.com", "password", Role.CUSTOMER, Country.MYANMAR),
-                new User("Mike", "ehrmantraut@gmail.com", "password", Role.CUSTOMER, Country.MYANMAR)
+                new User("Howard", "hamlin@gmail.com", passwordEncoder.encode("password"), Role.CUSTOMER, Country.SINGAPORE),
+                new User("Jimmy", "mcgill@gmail.com", passwordEncoder.encode("password"), Role.CUSTOMER, Country.SINGAPORE),
+                new User("Kim", "wexler@gmail.com", passwordEncoder.encode("password"), Role.CUSTOMER, Country.MYANMAR),
+                new User("Chuck", "chuck@gmail.com", passwordEncoder.encode("password"), Role.CUSTOMER, Country.MYANMAR),
+                new User("Mike", "ehrmantraut@gmail.com", passwordEncoder.encode("password"), Role.CUSTOMER, Country.MYANMAR)
         ));
     }
 
