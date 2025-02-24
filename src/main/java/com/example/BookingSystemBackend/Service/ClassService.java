@@ -1,20 +1,20 @@
 package com.example.BookingSystemBackend.Service;
 
 import com.example.BookingSystemBackend.DTO.BookingRequestDTO;
+import com.example.BookingSystemBackend.DTO.NewClassRequestDTO;
 import com.example.BookingSystemBackend.Enum.Country;
-import com.example.BookingSystemBackend.Enum.DurationType;
 import com.example.BookingSystemBackend.Exception.*;
 import com.example.BookingSystemBackend.Model.*;
 import com.example.BookingSystemBackend.Repository.*;
+import com.example.BookingSystemBackend.Utils.ZoneDateTimeHelper;
+import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
-import java.awt.print.Book;
-import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service
@@ -25,18 +25,53 @@ public class ClassService {
     private final PurchasedPackageRepository purchasedPackageRepository;
     private final BookedClassRepository bookedClassRepository;
     private final WaitlistRepository waitlistRepository;
+    private final ZoneDateTimeHelper zoneDateTimeHelper;
+    private final QuartzSchedulerService quartzSchedulerService;
 
     @Autowired
     public ClassService(ClassRepository classRepository,
                         UserRepository userRepository,
                         PurchasedPackageRepository purchasedPackageRepository,
                         BookedClassRepository bookedClassRepository,
-                        WaitlistRepository waitlistRepository) {
+                        WaitlistRepository waitlistRepository,
+                        ZoneDateTimeHelper zoneDateTimeHelper,
+                        QuartzSchedulerService quartzSchedulerService) {
         this.classRepository = classRepository;
         this.userRepository = userRepository;
         this.purchasedPackageRepository = purchasedPackageRepository;
         this.bookedClassRepository = bookedClassRepository;
         this.waitlistRepository = waitlistRepository;
+        this.zoneDateTimeHelper = zoneDateTimeHelper;
+        this.quartzSchedulerService = quartzSchedulerService;
+    }
+
+    public ClassInfo createNewClassSchedule(NewClassRequestDTO newClassRequestDTO) {
+
+        ZonedDateTime startTime = zoneDateTimeHelper.convertStringToZonedDateTime(newClassRequestDTO.getStartTime(), newClassRequestDTO.getCountry());
+        ZonedDateTime endTime = zoneDateTimeHelper.convertStringToZonedDateTime(newClassRequestDTO.getEndTime(), newClassRequestDTO.getCountry());
+
+
+        ClassInfo newClass = new ClassInfo(
+                startTime,
+                endTime,
+                newClassRequestDTO.getDuration(),
+                newClassRequestDTO.getCreditsRequired(),
+                newClassRequestDTO.getClassSize(),
+                newClassRequestDTO.getClassSize(),
+                newClassRequestDTO.getClassType(),
+                newClassRequestDTO.getCountry()
+        );
+
+        ClassInfo savedClass = classRepository.save(newClass);
+
+        try {
+            quartzSchedulerService.scheduleRefundJob(savedClass.getClassId(), savedClass.getEndTime());
+
+        } catch (SchedulerException e) {
+            e.printStackTrace();
+        }
+
+        return savedClass;
     }
 
     public List<ClassInfo> viewAllClasses(Country country) {
@@ -81,7 +116,7 @@ public class ClassService {
         // update the credits remaining in purchased package
         updateCreditsRemaining(packageAvailable, classInDB.get().getCreditsRequired());
 
-        LocalDateTime bookingTimestamp = LocalDateTime.now();
+        ZonedDateTime bookingTimestamp = ZonedDateTime.now();
 
         BookedClass bookedClass = new BookedClass(
                 bookingTimestamp,
@@ -106,8 +141,8 @@ public class ClassService {
 
         // check if class is in the past
 
-        LocalDateTime classTiming = classCancelled.getStartTime();
-        LocalDateTime cancellationTime = LocalDateTime.now();
+        ZonedDateTime classTiming = classCancelled.getStartTime();
+        ZonedDateTime cancellationTime = ZonedDateTime.now();
 
         if(cancellationTime.isAfter(classTiming)) throw new InvalidTimeException();
 
@@ -125,7 +160,7 @@ public class ClassService {
         Optional<Waitlist> firstOnWaitlist = waitlistRepository.getFirstOnWaitlist(classCancelled.getClassId());
 
         if(firstOnWaitlist.isPresent()) {
-            LocalDateTime bookingTimestamp = LocalDateTime.now();
+            ZonedDateTime bookingTimestamp = ZonedDateTime.now();
 
             BookedClass bookedClass = new BookedClass(
                     bookingTimestamp,
@@ -234,14 +269,17 @@ public class ClassService {
         BookedClass checkInClass = bookedClassInDB.get();
         ClassInfo classInfo = checkInClass.getClassBooked();
 
-        LocalDateTime startTime = classInfo.getStartTime();
-        LocalDateTime checkInTime = LocalDateTime.now();
+        // cannot check in to class that user has cancelled
+        if (checkInClass.isCancelled()) throw new RuntimeException("cannot check in to cancelled class");
+
+        ZonedDateTime startTime = classInfo.getStartTime();
+        ZonedDateTime checkInTime = ZonedDateTime.now();
 
         // cannot check in after class starts
-        if(checkInTime.isAfter(startTime)) throw new InvalidTimeException();
+        if(checkInTime.isAfter(startTime)) throw new RuntimeException("cannot check in after class starts");
 
         // cannot check in more than 30 minutes before class starts
-        if(Duration.between(checkInTime, startTime).toMinutes() > 30) throw new InvalidTimeException();
+        if(Duration.between(checkInTime, startTime).toMinutes() > 30) throw new RuntimeException("check in earliest 30 minutes before class");
 
         checkInClass.setCheckedIn(true);
 

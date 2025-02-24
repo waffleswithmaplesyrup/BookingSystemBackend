@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Entity
@@ -18,8 +19,8 @@ public class ClassInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long classId;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private ZonedDateTime startTime;
+    private ZonedDateTime endTime;
     private int duration;
     private int creditsRequired;
     private int classSize;
@@ -29,8 +30,8 @@ public class ClassInfo {
     @Enumerated(EnumType.STRING)
     private Country country;
 
-    public ClassInfo(LocalDateTime startTime,
-                     LocalDateTime endTime,
+    public ClassInfo(ZonedDateTime startTime,
+                     ZonedDateTime endTime,
                      int duration,
                      int creditsRequired,
                      int classSize,

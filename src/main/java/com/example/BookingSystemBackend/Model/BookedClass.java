@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Entity
@@ -15,8 +16,8 @@ public class BookedClass {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookedClassId;
-    private LocalDateTime bookingTime;
-    private LocalDateTime cancelledTime;
+    private ZonedDateTime bookingTime;
+    private ZonedDateTime cancelledTime;
     private boolean isCancelled;
     private boolean isRefunded;
     private boolean checkedIn;
@@ -25,8 +26,8 @@ public class BookedClass {
     @ManyToOne
     private User user;
 
-    public BookedClass(LocalDateTime bookingTime,
-                       LocalDateTime cancelledTime,
+    public BookedClass(ZonedDateTime bookingTime,
+                       ZonedDateTime cancelledTime,
                        boolean isCancelled,
                        boolean isRefunded,
                        boolean checkedIn,
