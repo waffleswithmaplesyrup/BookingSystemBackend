@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Entity
 @Data
 @NoArgsConstructor
-public class PackageBundle {
+public class PackageInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,13 +30,13 @@ public class PackageBundle {
     @Enumerated(EnumType.STRING)
     private Country country;
 
-    public PackageBundle(int credits,
-                         int durationValue,
-                         DurationType durationType,
-                         BigDecimal price,
-                         Currency currency,
-                         PackageType packageType,
-                         Country country) {
+    public PackageInfo(int credits,
+                       int durationValue,
+                       DurationType durationType,
+                       BigDecimal price,
+                       Currency currency,
+                       PackageType packageType,
+                       Country country) {
         this.credits = credits;
         this.durationValue = durationValue;
         this.durationType = durationType;

@@ -3,7 +3,7 @@ package com.example.BookingSystemBackend.Utils;
 import com.example.BookingSystemBackend.Enum.*;
 import com.example.BookingSystemBackend.Model.*;
 import com.example.BookingSystemBackend.Model.ClassInfo;
-import com.example.BookingSystemBackend.Model.PackageBundle;
+import com.example.BookingSystemBackend.Model.PackageInfo;
 import com.example.BookingSystemBackend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -61,10 +61,10 @@ public class DatabaseHelper {
 
     public void savePackages() {
         packageRepository.saveAll(Arrays.asList(
-                new PackageBundle(5, 15, DurationType.DAY, BigDecimal.valueOf(200), Currency.SGD, PackageType.BASIC, Country.SINGAPORE),
-                new PackageBundle(50, 12, DurationType.MONTH, BigDecimal.valueOf(1900), Currency.SGD, PackageType.ULTIMATE, Country.SINGAPORE),
-                new PackageBundle(5, 15, DurationType.DAY, BigDecimal.valueOf(30_000), Currency.MMK, PackageType.BASIC, Country.MYANMAR),
-                new PackageBundle(50, 12, DurationType.MONTH, BigDecimal.valueOf(285_000), Currency.MMK, PackageType.ULTIMATE, Country.MYANMAR)
+                new PackageInfo(5, 15, DurationType.DAY, BigDecimal.valueOf(200), Currency.SGD, PackageType.BASIC, Country.SINGAPORE),
+                new PackageInfo(50, 12, DurationType.MONTH, BigDecimal.valueOf(1900), Currency.SGD, PackageType.ULTIMATE, Country.SINGAPORE),
+                new PackageInfo(5, 15, DurationType.DAY, BigDecimal.valueOf(30_000), Currency.MMK, PackageType.BASIC, Country.MYANMAR),
+                new PackageInfo(50, 12, DurationType.MONTH, BigDecimal.valueOf(285_000), Currency.MMK, PackageType.ULTIMATE, Country.MYANMAR)
         ));
     }
 
@@ -118,7 +118,7 @@ public class DatabaseHelper {
         List<User> allUsers = userRepository.findAll();
         System.out.println("Line 80: " + allUsers);
 
-        List<PackageBundle> allPackages = packageRepository.findAll();
+        List<PackageInfo> allPackages = packageRepository.findAll();
         System.out.println("Line 77: " + allPackages);
 
         purchasedPackageRepository.saveAll(Arrays.asList(

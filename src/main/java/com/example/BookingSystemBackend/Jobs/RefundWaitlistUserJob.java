@@ -51,7 +51,7 @@ public class RefundWaitlistUserJob implements Job {
 
             // Perform update on waitlist and purchasedPackage
 
-            List<Waitlist> waitlistUsers = waitlistRepository.findAllByClassWaitlisted_ClassId(classInfo.getClassId());
+            List<Waitlist> waitlistUsers = waitlistRepository.findAllByClassInfo_ClassId(classInfo.getClassId());
 
             // cycle through each user in waitlist
             for (Waitlist waitlistUser : waitlistUsers) {

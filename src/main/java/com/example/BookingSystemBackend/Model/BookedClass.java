@@ -22,8 +22,10 @@ public class BookedClass {
     private boolean isRefunded;
     private boolean checkedIn;
     @ManyToOne
-    private ClassInfo classBooked;
+    @JoinColumn(name = "FK_classId")
+    private ClassInfo classInfo;
     @ManyToOne
+    @JoinColumn(name = "FK_userId")
     private User user;
 
     public BookedClass(ZonedDateTime bookingTime,
@@ -31,14 +33,14 @@ public class BookedClass {
                        boolean isCancelled,
                        boolean isRefunded,
                        boolean checkedIn,
-                       ClassInfo classBooked,
+                       ClassInfo classInfo,
                        User user) {
         this.bookingTime = bookingTime;
         this.cancelledTime = cancelledTime;
         this.isCancelled = isCancelled;
         this.isRefunded = isRefunded;
         this.checkedIn = checkedIn;
-        this.classBooked = classBooked;
+        this.classInfo = classInfo;
         this.user = user;
     }
 }

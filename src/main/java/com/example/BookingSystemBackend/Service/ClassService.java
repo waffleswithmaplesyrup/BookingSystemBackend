@@ -158,7 +158,7 @@ public class ClassService {
         if(bookedClassInDB.isEmpty()) throw new NoSuchElementException();
 
         BookedClass cancelledBooking = bookedClassInDB.get();
-        ClassInfo classCancelled = cancelledBooking.getClassBooked();
+        ClassInfo classCancelled = cancelledBooking.getClassInfo();
 
         // check if class is in the past
 
@@ -189,7 +189,7 @@ public class ClassService {
                     false,
                     false,
                     false,
-                    firstOnWaitlist.get().getClassWaitlisted(),
+                    firstOnWaitlist.get().getClassInfo(),
                     firstOnWaitlist.get().getUser()
             );
             // first in waitlist gets autobooked to class
@@ -224,7 +224,7 @@ public class ClassService {
 
         // check if user has already booked this class
         boolean hasBookedThisClass =  bookedClassRepository.numberOfBookingsMadeToThisClass(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()) >= 1;
-        boolean isAlreadyInWaitlist = !waitlistRepository.findAllByUser_UserIdAndClassWaitlisted_ClassId(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()).isEmpty();
+        boolean isAlreadyInWaitlist = !waitlistRepository.findAllByUser_UserIdAndClassInfo_ClassId(bookingRequestDTO.getUserId(), bookingRequestDTO.getClassId()).isEmpty();
         if (hasBookedThisClass || isAlreadyInWaitlist) throw new AlreadyBookedClassException();
 
         // check if class has available slots
@@ -263,7 +263,7 @@ public class ClassService {
     }
 
     private boolean getsRefund(BookedClass bookedClass) {
-        long hoursBeforeClassStarts = Duration.between(bookedClass.getCancelledTime(), bookedClass.getClassBooked().getStartTime()).toHours();
+        long hoursBeforeClassStarts = Duration.between(bookedClass.getCancelledTime(), bookedClass.getClassInfo().getStartTime()).toHours();
         return hoursBeforeClassStarts >= 4;
     }
 
@@ -288,7 +288,7 @@ public class ClassService {
         if(bookedClassInDB.isEmpty()) throw new NoSuchElementException("class or user not found");
 
         BookedClass checkInClass = bookedClassInDB.get();
-        ClassInfo classInfo = checkInClass.getClassBooked();
+        ClassInfo classInfo = checkInClass.getClassInfo();
 
         // cannot check in to class that user has cancelled
         if (checkInClass.isCancelled()) throw new RuntimeException("cannot check in to cancelled class");

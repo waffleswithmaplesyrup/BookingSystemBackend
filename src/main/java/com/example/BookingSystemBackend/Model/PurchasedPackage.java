@@ -19,21 +19,23 @@ public class PurchasedPackage {
     private ZonedDateTime expiryDate;
     private boolean isExpired;
     @ManyToOne
-    private PackageBundle packageBundle;
+    @JoinColumn(name = "FK_packageInfoId")
+    private PackageInfo packageInfo;
     @ManyToOne
+    @JoinColumn(name = "FK_userId")
     private User user;
 
     public PurchasedPackage(int creditsRemaining,
                             ZonedDateTime purchaseDate,
                             ZonedDateTime expiryDate,
                             boolean isExpired,
-                            PackageBundle packageBundle,
+                            PackageInfo packageInfo,
                             User user) {
         this.creditsRemaining = creditsRemaining;
         this.purchaseDate = purchaseDate;
         this.expiryDate = expiryDate;
         this.isExpired = isExpired;
-        this.packageBundle = packageBundle;
+        this.packageInfo = packageInfo;
         this.user = user;
     }
 }
